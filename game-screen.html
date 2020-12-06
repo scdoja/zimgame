@@ -1,8 +1,9 @@
 <!doctype html>
 <html>
 <head>
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
 <meta charset="utf-8" />
-<title>ZIM - Code Creativity</title>
+<title>ZIM - Spotted!</title>
 
 <!-- Welcome to ZIM at https://zimjs.com - Code Creativity!                              -->
 <!-- ZIM runs on the HTML Canvas powered by JavaScript and CreateJS https://createjs.com -->
@@ -26,9 +27,12 @@ const width = 1024;
 const height = 768;
 const color = light; // ZIM colors like green, blue, pink, faint, clear, etc.
 const outerColor = dark; // any HTML colors like "violet", "#333", etc. are fine to use
-const assets = ["tire.png", "tire2.png"];
+const assets = ["bg.png", "bus.png"];
+const path = ["assets/"];
 
-const frame = new Frame(scaling, width, height, color, outerColor, assets);
+const waiter = new Waiter();
+
+const frame = new Frame(scaling, width, height, color, outerColor, assets, path, waiter);
 frame.on("ready", () => { // ES6 Arrow Function - like function(){}
     zog("ready from ZIM Frame"); // logs in console (F12 - choose console)
 
@@ -45,22 +49,26 @@ frame.on("ready", () => { // ES6 Arrow Function - like function(){}
     // This can be set back with TIME = "milliseconds" but we suggest you give it a try!
     // There will be a warning in the conslole if your animation is not moving ;-)
 
-    const tire = asset("tire.png").sca(0.02).centerReg().pos(350).animate({
-        props:{rotation:360},
-        loop:true,
-        ease:"linear",
+    //Game Screen Container
+    const screen = new Container(stageW, stageH).addTo();
+
+    //Game Background
+    const background = asset("bg.png").center(screen);
+
+    //Game Background Scoller
+    const scroll = new Scroller({
+        backing:background,
+        speed: 2,
+        direction:1,
     });
 
-    const tire2 = asset("tire2.png").sca(0.02).centerReg().pos(500).animate({
-        props:{rotation:360},
-        loop:true,
-        ease:"linear",
-    });
+    //Game User Bus
+    const bus = asset("bus.png").addTo(screen).sca(.5).pos(150,200,BOTTOM,CENTER)
+    .animate({props:{y:"2"}, time:.2, rewind:true, loop:true})
 
-    // without chaining
-    // const circle = new Circle(100, pink);
-    // circle.center();
-    // circle.drag();
+    .tap(function() {
+	bus.animate({obj:{rotation:-30}, time:.4, rewind:true, rewindWait:.3, override: false});
+	});
 
     stage.update(); // this is needed to show any changes
 

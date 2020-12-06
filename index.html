@@ -1,0 +1,251 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>spotted!</title>
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+<script src="https://zimjs.org/cdn/1.3.2/createjs.js"></script>
+<script src="https://zimjs.org/cdn/cat/02/zim.js"></script>
+<script>
+// https://zimjs.com - JavaScript Canvas Framework - Code Creativity!
+
+const bg = ["bg.png"];
+const cars = ["car1.png", "car2.png", "car3.png", "car4.png", "lorry.png" ];
+const cars2 = ["car1.png", "car2.png", "car3.png", "car4.png", "lorry.png" ];
+const logo = ["slogo.png"];
+const planes = ["plane.png", "plane2.png"];
+const font = [{font:"milky", src:"MilkyNice.ttf"}];
+const assets = bg.concat(cars).concat(logo).concat(planes).concat(font);
+const path = ["assets/"];
+
+const waiter = new Waiter();
+
+const frame = new Frame("fit", 1024, 768, light, dark, assets, path, Waiter);
+frame.on("ready", () => {
+    const stage = frame.stage;
+    let stageW = frame.width;
+    let stageH = frame.height;
+
+    //Game Screen Container
+    const screen = new Container(stageW, stageH).addTo();
+
+
+    //Game Background
+    const background = asset("bg.png").center(screen);
+
+    //Game Background Scoller
+    const scroll = new Scroller({
+        backing:background,
+        speed: 2,
+        direction:1,
+    });
+
+    //Game User Bus
+    //const bus = asset("bus.png").addTo(screen).sca(.5).pos(150,200,BOTTOM,CENTER)
+    //.animate({props:{y:"2"}, time:.2, rewind:true, loop:true});
+
+    const logo = asset("slogo.png").sca(0.85).pos(0,140, CENTER, screen);
+
+    const buttonlabel = new Label({
+        text:"PLAY",
+        size:35,
+        font:"milky",
+        color:white,
+        bold:true,
+    });
+
+    const button = new Button({
+        width: 300,
+        height: 85,
+        label: buttonlabel,
+        backgroundColor: "red",
+        rollBackgroundColor: "green",
+        corner:40,
+    }).pos(0, 325, CENTER, screen);
+
+    button.tap(e=>{
+        logo.removeFrom();
+        button.removeFrom();
+        button2.removeFrom();
+        gameLevel1();
+    })
+
+    const buttonlabel2 = new Label({
+        text:"HELP",
+        size:35,
+        font:"milky",
+        color:white,
+        bold:true,
+    });
+
+    const button2 = new Button({
+        width: 300,
+        height: 85,
+        label: buttonlabel2,
+        backgroundColor: "#F5DD07",
+        rollBackgroundColor: "green",
+        corner:40,
+    }).pos(0, 435, CENTER, screen);
+
+    button2.on("click", function(){
+        logo.removeFrom();
+        button.removeFrom();
+        button2.removeFrom();
+        helpscreen();
+    });
+
+    function helpscreen(){
+        const helpscreen = new Container(stageW, stageH).addTo();
+
+        const helplabel = new Label({
+            text:"How to play Spotted!",
+            font:"milky",
+            color:"red",
+            size:50,
+            bold:true,
+        }).pos(0,150, CENTER,TOP, helpscreen);
+
+        const text = new Label({
+            text:"Spot the driving cars going by the bus!",
+            font:"milky",
+            color:"#F2DA00",
+            size:35,
+        }).pos(0, 220, CENTER, TOP, helpscreen);
+
+        const text2 = new Label({
+            text:"Earn points by clicking the cars!",
+            font:"milky",
+            color:"green",
+            size:35,
+        }).pos(0, 280, CENTER, TOP, helpscreen);
+
+        const button3 = new Button({
+            width: 300,
+            height: 85,
+            label: buttonlabel,
+            backgroundColor: "red",
+            rollBackgroundColor: "green",
+            corner:40,
+        }).pos(0, 325, CENTER, helpscreen)
+        .mov(0,100)
+        .alp(0)
+        .animate({props:{alpha:1},wait:5});
+
+        button3.tap(e=>{
+            helplabel.removeFrom();
+            text.removeFrom();
+            text2.removeFrom();
+            button3.removeFrom();
+            gameLevel1();
+        });
+}
+
+let score=0;
+let carScroller;
+let scoreLabel;
+
+function gameLevel1(){
+const gamescreen = new Container(stageW, stageH).addTo();
+const road = new Container().addTo();
+
+loop(cars, (car, i) => {
+    const x = stageW/3;
+    const spacing = rand(stageW/2, stageW);
+    const vehicle = asset(car).centerReg().scaleTo(stage,null,20).pos(x + spacing * i, 425, road).addTo(road);
+});
+
+carScroller = new Scroller (road, 8, 1);
+
+scoreLabel = new Label({
+text:"Click the Green Truck to earn points!",
+font:"milky",
+color:"green",
+size:45,
+}).pos(50, 50, gamescreen);
+
+carScroller.backing1.tap(e=>{
+    console.log(e.target.fileID);
+    if (e.target.fileID === "lorry.png") {
+        e.target.animate({
+            props:{rotation:360},
+            ease:"linear",
+            rewind:true,
+        });
+        score+=1;
+        scoreLabel.text="Score: "+score;
+        }
+    if (score===10){
+        carScroller.backing1.removeFrom();
+        carScroller.backing2.removeFrom();
+        scoreLabel.removeFrom();
+        gameLevel2();
+    }
+    });
+    carScroller.backing2.tap(e=>{
+        console.log(e.target.fileID);
+        if (e.target.fileID === "lorry.png") {
+            e.target.animate({
+                props:{rotation:360},
+                ease:"linear",
+                rewind:true,
+            });
+            score+=1;
+            scoreLabel.text="Score: "+score;
+            }
+        if (score===10){
+            carScroller.backing1.removeFrom();
+            carScroller.backing2.removeFrom();
+            scoreLabel.removeFrom();
+            gameLevel2();
+        }
+    });
+}
+
+    function gameLevel2(){
+    const gamescreen2 = new Container(stageW, stageH).addTo();
+    const sky = new Container().addTo();
+    const road2 = new Container().addTo();
+
+    loop(planes, (plane, i) => {
+        const x = stageW/3;
+        const spacing = rand(stageW/2, stageW);
+        const fly = asset(plane).centerReg().scaleTo(stage,null,20).pos(x + spacing * i, 15, sky).addTo(sky);
+    });
+
+    planeScroller = new Scroller(sky, 8, 1);
+
+    score2Label = new Label({
+    text:"Level 2! Click the **** to earn points!",
+    font:"milky",
+    color:"red",
+    size:45,
+}).pos(50, 50, gamescreen2);
+
+    loop(cars2, (car2, i) =>{
+        const x = stageW/3;
+        const spacing = rand(stageW/2, stageW);
+        const vehicle2 = asset(car2).centerReg().scaleTo(stage,null,20).pos(x + spacing * i, 325, road2).addTo(road2);
+    });
+
+    car2Scroller = new Scroller(road2, 4, 1);
+
+    loop(cars2, (car2, i) =>{
+        const x = stageW/3;
+        const spacing = rand(stageW/2, stageW);
+        const vehicle2 = asset(car2).centerReg().scaleTo(stage,null,10).pos(x + spacing * i, 255, road2).addTo(road2);
+    });
+
+    car2Scroller = new Scroller(road2, 8, 1);
+
+    //score code for level 2 can be inputted down below here
+
+}
+
+    stage.update();
+});
+
+</script>
+<meta name="viewport" content="width=device-width, user-scalable=no" />
+</head>
+<body></body>
+</html>
